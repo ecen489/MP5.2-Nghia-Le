@@ -10,12 +10,15 @@ import android.widget.Toast;
 
 import org.w3c.dom.Text;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
 public class activity_quiz extends AppCompatActivity {
     private static final String[] quizTopics = {"Anatomy", "Geography", "Movies"};
-    private static final String[] quizQuestions = {"What is the largest joint in the human body?",
-            "What is the world's longest river?",
-            "Who directed the Lord of the Rings trilogy?"};
-    private static final String[] quizAnswers = {"knee", "amazon", "peter jackson"};
+    private String [] quizQuestionsFromTextFile = new String[3];
+    private String [] quizAnswersFromTextFile = new String[3];
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,33 +29,45 @@ public class activity_quiz extends AppCompatActivity {
         String extra = forwardIntent.getStringExtra("topic");
         TextView textview = (TextView) findViewById(R.id.questionText);
 
+        try {
+            quizQuestionsFromTextFile = getQuizQuestions();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            quizAnswersFromTextFile = getQuizAnswers();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         if (extra.equals(quizTopics[0])) {
-            textview.setText(quizQuestions[0]);
+            textview.setText(quizQuestionsFromTextFile[0]);
         }
         if (extra.equals(quizTopics[1])) {
-            textview.setText(quizQuestions[1]);
+            textview.setText(quizQuestionsFromTextFile[1]);
         }
         if (extra.equals(quizTopics[2])) {
-            textview.setText(quizQuestions[2]);
+            textview.setText(quizQuestionsFromTextFile[2]);
         }
     }
 
     public int getAnswer(String userAnswer){
         TextView textview = (TextView) findViewById(R.id.questionText);
-        if (textview.getText().toString().equals(quizQuestions[0])) {
-            if(userAnswer.equals(quizAnswers[0]))
+        if (textview.getText().toString().equals(quizQuestionsFromTextFile[0])) {
+            if(userAnswer.equals(quizAnswersFromTextFile[0]))
                 return 1;
             else
                 return 0;
         }
-        else if (textview.getText().toString().equals(quizQuestions[1])) {
-            if(userAnswer.equals(quizAnswers[1]))
+        else if (textview.getText().toString().equals(quizQuestionsFromTextFile[1])) {
+            if(userAnswer.equals(quizAnswersFromTextFile[1]))
                 return 1;
             else
                 return 0;
         }
         else {
-            if(userAnswer.equals(quizAnswers[2]))
+            if(userAnswer.equals(quizAnswersFromTextFile[2]))
                 return 1;
             else
                 return 0;
@@ -68,5 +83,33 @@ public class activity_quiz extends AppCompatActivity {
         backIntent.putExtra("isCorrect", isCorrect);
         setResult(RESULT_OK, backIntent);
         finish();
+    }
+
+    public String[] getQuizQuestions() throws IOException {
+        String[] questions = new String[3];
+        InputStream inputStream = getResources().openRawResource(R.raw.quizquestions);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        while (true) {
+            String line = reader.readLine();
+            if(line == null) {
+                break;
+            }
+            questions = line.split(",");
+        }
+        return questions;
+    }
+
+    public String[] getQuizAnswers() throws IOException {
+        String[] answers = new String[3];
+        InputStream inputStream = getResources().openRawResource(R.raw.quizanswers);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        while (true) {
+            String line = reader.readLine();
+            if(line == null) {
+                break;
+            }
+            answers = line.split(",");
+        }
+        return answers;
     }
 }
